@@ -29,6 +29,6 @@ namespace BankingTransactionApi.Models
         public string Status { get; set; } = "Completed";
 
         [Column(TypeName = "nvarchar(255)")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 }

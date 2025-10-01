@@ -1,10 +1,16 @@
-﻿namespace BankingTransactionApi.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BankingTransactionApi.Models
 {
     public class TransferRequest
     {
-        public string FromAccount { get; set; }
-        public string ToAccount { get; set; }
+        [Required]
+        public required string FromAccount { get; set; }
+        [Required]
+        public required string ToAccount { get; set; }
+        [Required]
         public decimal Amount { get; set; }
-        public string Description { get; set; }
+        [Required]
+        public string? Description { get; set; }
     }
 }

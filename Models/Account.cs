@@ -10,11 +10,11 @@ namespace BankingTransactionApi.Models
 
         [Required]
         [Column(TypeName = "nvarchar(50)")]
-        public string AccountNumber { get; set; }
+        public string AccountNumber { get; set; } = string.Empty;
 
         [Required]
         [Column(TypeName = "nvarchar(100)")]
-        public string AccountHolderName { get; set; }
+        public string AccountHolderName { get; set; } = string.Empty;
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal Balance { get; set; }
@@ -25,5 +25,11 @@ namespace BankingTransactionApi.Models
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Foreign key - NOT required
+        public int UserId { get; set; }
+
+        // Navigation property - NOT required
+        public virtual User? User { get; set; }
     }
 }
