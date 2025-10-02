@@ -15,7 +15,7 @@ namespace BankingTransactionApi.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly BankingContext _context;  // Add private field
-        private SigningCredentials credentials;
+        private readonly SigningCredentials credentials;
 
         // Use constructor injection properly
         public AuthController(IConfiguration configuration, BankingContext context)
@@ -61,11 +61,8 @@ namespace BankingTransactionApi.Controllers
         }
         private string GenerateJwtToken(string username)
         {
-            var jwtKey = _configuration["Jwt:Key"];
-            if (string.IsNullOrEmpty(jwtKey))
-                throw new Exception("JWT Key is not configured");
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? ""));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             // rest of method unchanged
 
             var claims = new[]

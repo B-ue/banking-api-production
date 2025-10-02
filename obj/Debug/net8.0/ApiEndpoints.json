@@ -1,5 +1,61 @@
 [
   {
+    "ContainingType": "AdminController",
+    "Method": "GetAllTransactions",
+    "RelativePath": "api/Admin/transactions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[BankingTransactionApi.Models.Transaction, BankingTransactionApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "AdminController",
+    "Method": "GetAllUsers",
+    "RelativePath": "api/Admin/users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[BankingTransactionApi.Models.User, BankingTransactionApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "AdminController",
+    "Method": "LockUser",
+    "RelativePath": "api/Admin/users/{userId}/lock",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "BankingTransactionApi.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/Auth/login",
@@ -33,7 +89,7 @@
   },
   {
     "ContainingType": "BankingTransactionApi.Controllers.TransactionsController",
-    "Method": "GetAccounts",
+    "Method": "GetAllAccounts",
     "RelativePath": "api/Transactions/accounts",
     "HttpMethod": "GET",
     "IsController": true,
@@ -42,6 +98,32 @@
     "ReturnTypes": [
       {
         "Type": "System.Collections.Generic.List\u00601[[BankingTransactionApi.Models.Account, BankingTransactionApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BankingTransactionApi.Controllers.TransactionsController",
+    "Method": "GetBalance",
+    "RelativePath": "api/Transactions/balance/{accountNumber}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "accountNumber",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Decimal",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -79,21 +161,35 @@
   },
   {
     "ContainingType": "BankingTransactionApi.Controllers.TransactionsController",
-    "Method": "DbTransfer",
-    "RelativePath": "api/Transactions/db-transfer",
-    "HttpMethod": "POST",
+    "Method": "GetMyAccounts",
+    "RelativePath": "api/Transactions/my-accounts",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [
-      {
-        "Name": "request",
-        "Type": "BankingTransactionApi.Models.TransferRequest",
-        "IsRequired": true
-      }
-    ],
+    "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "System.String",
+        "Type": "System.Collections.Generic.List\u00601[[BankingTransactionApi.Models.Account, BankingTransactionApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BankingTransactionApi.Controllers.TransactionsController",
+    "Method": "GetMyTransactions",
+    "RelativePath": "api/Transactions/my-transactions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[BankingTransactionApi.Models.Transaction, BankingTransactionApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -125,6 +221,32 @@
         "Name": "amount",
         "Type": "System.Decimal",
         "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.String",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BankingTransactionApi.Controllers.TransactionsController",
+    "Method": "Transfer",
+    "RelativePath": "api/Transactions/transfer",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "BankingTransactionApi.Models.TransferRequest",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": [
