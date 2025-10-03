@@ -19,16 +19,29 @@ namespace BankingTransactionApi.Models
         public int ToAccountId { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18,2)")]  // ONLY this attribute for Amount
+        [Range(0.01, double.MaxValue)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Amount { get; set; }
 
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-        [Required]
         [Column(TypeName = "nvarchar(50)")]
         public string Status { get; set; } = "Completed";
 
         [Column(TypeName = "nvarchar(255)")]
         public string? Description { get; set; }
+
+        
+        [Column(TypeName = "nvarchar(20)")]
+        public string? RiskLevel { get; set; } 
+
+        public bool IsFlagged { get; set; } = false;
+
+        [Column(TypeName = "nvarchar(500)")]
+        public string? ScreeningResult { get; set; }
+
+        // Navigation properties
+        public virtual Account? FromAccount { get; set; }
+        public virtual Account? ToAccount { get; set; }
     }
 }

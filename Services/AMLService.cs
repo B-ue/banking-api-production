@@ -1,14 +1,47 @@
-﻿using BankingTransactionApi.Models;
+﻿using BankingTransactionApi.Data;
+using BankingTransactionApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankingTransactionApi.Services
 {
     public class AMLService
     {
-        private readonly ILogger<AMLService> _logger;
+        private readonly BankingContext _context;
+        private readonly Random _random = new();
 
-        public AMLService(ILogger<AMLService> logger)
+        public AMLService(BankingContext context)
         {
-            _logger = logger;
+            _context = context;
+        }
+
+        public async Task<string> GenerateAccountNumber()
+        {
+            string accountNumber;
+            bool isUnique;
+
+            do
+            {
+                accountNumber = $"021{_random.Next(1000000, 9999999):D7}";
+                isUnique = !await _context.Accounts.AnyAsync(a => a.AccountNumber == accountNumber);
+            }
+            while (!isUnique);
+
+            return accountNumber;
+        }
+
+        public string GenerateCustomerId(int userId)
+        {
+            return $"CUS{DateTime.UtcNow:yyyyMMddHHmmss}{userId:D6}";
+        }
+
+        public string GenerateRoutingNumber()
+        {
+            return "021000021";
+        }
+
+        public string GenerateAccountName(string username)
+        {
+            return $"{username}'s Primary Account";
         }
 
         public AMLResult ScreenTransaction(Transaction transaction, Account fromAccount, Account toAccount)
@@ -17,22 +50,13 @@ namespace BankingTransactionApi.Services
             var riskScore = 0;
 
             // Rule 1: Large Transaction Monitoring (CTR threshold)
-            if (transaction.Amount > 10000) // $10,000 CTR requirement
+            if (transaction.Amount > 10000)
             {
                 riskFactors.Add(RiskFactor.LargeTransaction);
                 riskScore += 30;
-                _logger.LogWarning($"Large transaction detected: {transaction.Amount}");
             }
 
-            // Rule 2: Rapid Successive Transactions
-            // This would require transaction history - placeholder for now
-            if (transaction.Amount > 5000)
-            {
-                riskFactors.Add(RiskFactor.ModerateAmount);
-                riskScore += 15;
-            }
-
-            // Rule 3: Round Amounts (common in structuring)
+            // Rule 2: Round Amounts (common in structuring)
             if (IsRoundAmount(transaction.Amount))
             {
                 riskFactors.Add(RiskFactor.RoundAmount);
@@ -42,51 +66,45 @@ namespace BankingTransactionApi.Services
             // Determine risk level
             var riskLevel = riskScore switch
             {
-                >= 30 => RiskLevel.High,
-                >= 15 => RiskLevel.Medium,
-                _ => RiskLevel.Low
+                >= 30 => "High",
+                >= 15 => "Medium",
+                _ => "Low"
             };
+
+            var isFlagged = riskLevel == "High";
 
             return new AMLResult
             {
                 RiskLevel = riskLevel,
                 RiskFactors = riskFactors,
                 RiskScore = riskScore,
-                IsSuspicious = riskLevel == RiskLevel.High,
-                RequiredAction = riskLevel == RiskLevel.High ? "Escalate to compliance officer" : "None"
+                IsSuspicious = isFlagged,
+                RequiredAction = isFlagged ? "Escalate to compliance officer" : "None"
             };
         }
 
         private bool IsRoundAmount(decimal amount)
         {
-            // Check if amount is round (ends with .00)
             return amount == Math.Round(amount);
         }
     }
 
     public class AMLResult
     {
-        public RiskLevel RiskLevel { get; set; }
+        public string RiskLevel { get; set; } = string.Empty;
         public List<RiskFactor> RiskFactors { get; set; } = new();
         public int RiskScore { get; set; }
         public bool IsSuspicious { get; set; }
         public string RequiredAction { get; set; } = string.Empty;
     }
 
-    public enum RiskLevel
-    {
-        Low,
-        Medium,
-        High
-    }
-
     public enum RiskFactor
     {
-        LargeTransaction,    // > $10,000
-        ModerateAmount,      // > $5,000
-        RoundAmount,         // Even dollar amounts
-        RapidTransactions,   // Multiple quick transactions
-        HighRiskCountry,     // Transactions with sanctioned countries
-        PEPInvolved          // Politically Exposed Person
+        LargeTransaction,
+        ModerateAmount,
+        RoundAmount,
+        RapidTransactions,
+        HighRiskCountry,
+        PEPInvolved
     }
 }

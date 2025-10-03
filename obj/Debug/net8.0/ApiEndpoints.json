@@ -1,55 +1,109 @@
 [
   {
-    "ContainingType": "AdminController",
-    "Method": "GetAllTransactions",
-    "RelativePath": "api/Admin/transactions",
+    "ContainingType": "BankingTransactionApi.Controllers.AdminController",
+    "Method": "GetBusinessIntelligence",
+    "RelativePath": "api/Admin/business-intelligence",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.List\u00601[[BankingTransactionApi.Models.Transaction, BankingTransactionApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
-    "ContainingType": "AdminController",
-    "Method": "GetAllUsers",
-    "RelativePath": "api/Admin/users",
+    "ContainingType": "BankingTransactionApi.Controllers.AdminController",
+    "Method": "GenerateComplianceReport",
+    "RelativePath": "api/Admin/compliance-report",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": [
+    "Parameters": [
       {
-        "Type": "System.Collections.Generic.List\u00601[[BankingTransactionApi.Models.User, BankingTransactionApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
+        "Name": "startDate",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "endDate",
+        "Type": "System.DateTime",
+        "IsRequired": false
       }
-    ]
+    ],
+    "ReturnTypes": []
   },
   {
-    "ContainingType": "AdminController",
-    "Method": "LockUser",
-    "RelativePath": "api/Admin/users/{userId}/lock",
+    "ContainingType": "BankingTransactionApi.Controllers.AdminController",
+    "Method": "CreateAdmin",
+    "RelativePath": "api/Admin/create-admin",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
+        "Name": "request",
+        "Type": "BankingTransactionApi.Models.RegisterRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BankingTransactionApi.Controllers.AdminController",
+    "Method": "GetCustomerProfile",
+    "RelativePath": "api/Admin/customer/{customerId}/profile",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "customerId",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BankingTransactionApi.Controllers.AdminController",
+    "Method": "SetupSuperAdmin",
+    "RelativePath": "api/Admin/setup-super-admin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "BankingTransactionApi.Models.RegisterRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BankingTransactionApi.Controllers.AdminController",
+    "Method": "GetSuspiciousTransactions",
+    "RelativePath": "api/Admin/suspicious-transactions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BankingTransactionApi.Controllers.AdminController",
+    "Method": "ReviewFlaggedTransaction",
+    "RelativePath": "api/Admin/transactions/{transactionId}/review",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "transactionId",
         "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "BankingTransactionApi.Models.ReviewRequest",
         "IsRequired": true
       }
     ],

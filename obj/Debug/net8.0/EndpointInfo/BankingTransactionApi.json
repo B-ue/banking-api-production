@@ -1,94 +1,114 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "BankingTransactionApi",
-    "version": "1.0"
+    "title": "Banking API",
+    "version": "v1"
   },
   "paths": {
-    "/api/Admin/users": {
+    "/api/Admin/setup-super-admin": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Admin/create-admin": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Admin/business-intelligence": {
       "get": {
         "tags": [
           "Admin"
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
     },
-    "/api/Admin/transactions": {
+    "/api/Admin/customer/{customerId}/profile": {
       "get": {
         "tags": [
           "Admin"
         ],
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Transaction"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Transaction"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Transaction"
-                  }
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
     },
-    "/api/Admin/users/{userId}/lock": {
+    "/api/Admin/transactions/{transactionId}/review": {
       "post": {
         "tags": [
           "Admin"
         ],
         "parameters": [
           {
-            "name": "userId",
+            "name": "transactionId",
             "in": "path",
             "required": true,
             "schema": {
@@ -96,6 +116,67 @@
               "format": "int32"
             }
           }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Admin/compliance-report": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Admin/suspicious-transactions": {
+      "get": {
+        "tags": [
+          "Admin"
         ],
         "responses": {
           "200": {
@@ -560,7 +641,8 @@
         "type": "object",
         "properties": {
           "riskLevel": {
-            "$ref": "#/components/schemas/RiskLevel"
+            "type": "string",
+            "nullable": true
           },
           "riskFactors": {
             "type": "array",
@@ -701,6 +783,20 @@
         },
         "additionalProperties": false
       },
+      "ReviewRequest": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "RiskFactor": {
         "enum": [
           0,
@@ -713,20 +809,10 @@
         "type": "integer",
         "format": "int32"
       },
-      "RiskLevel": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
       "Transaction": {
         "required": [
           "amount",
           "fromAccountId",
-          "status",
           "toAccountId",
           "transactionId"
         ],
@@ -749,6 +835,7 @@
             "format": "int32"
           },
           "amount": {
+            "minimum": 0.01,
             "type": "number",
             "format": "double"
           },
@@ -757,12 +844,29 @@
             "format": "date-time"
           },
           "status": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "description": {
             "type": "string",
             "nullable": true
+          },
+          "riskLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "isFlagged": {
+            "type": "boolean"
+          },
+          "screeningResult": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromAccount": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "toAccount": {
+            "$ref": "#/components/schemas/Account"
           }
         },
         "additionalProperties": false
@@ -814,8 +918,10 @@
       },
       "User": {
         "required": [
+          "customerId",
           "email",
           "passwordHash",
+          "role",
           "username"
         ],
         "type": "object",
@@ -837,12 +943,12 @@
             "type": "string"
           },
           "customerId": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "role": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "createdAt": {
             "type": "string",
@@ -861,6 +967,19 @@
         },
         "additionalProperties": false
       }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+        "name": "Authorization",
+        "in": "header"
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
 }

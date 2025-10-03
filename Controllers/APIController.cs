@@ -155,13 +155,18 @@ namespace BankingTransactionApi.Controllers
                 fromAccount.Balance -= request.Amount;
                 toAccount.Balance += request.Amount;
 
+                // Record transaction WITH RISK DATA
                 var transactionRecord = new Transaction
                 {
                     FromAccountId = fromAccount.Id,
                     ToAccountId = toAccount.Id,
                     Amount = request.Amount,
                     Description = request.Description ?? $"Transfer to {toAccount.AccountNumber}",
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow,
+                    RiskLevel = amlResult.RiskLevel,
+                    IsFlagged = amlResult.IsSuspicious,
+                    ScreeningResult = amlResult.IsSuspicious ?
+                        $"Flagged for: {string.Join(", ", amlResult.RiskFactors)}" : "Clean"
                 };
 
                 _context.Transactions.Add(transactionRecord);
