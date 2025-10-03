@@ -85,6 +85,26 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": [
+      {
+        "Type": "BankingTransactionApi.Models.RegistrationResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BankingTransactionApi.Controllers.AuthController",
+    "Method": "TestAccountGeneration",
+    "RelativePath": "api/Auth/test-account-generation",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {
@@ -251,7 +271,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.String",
+        "Type": "BankingTransactionApi.Controllers.TransactionsController\u002BTransferResponse",
         "MediaTypes": [
           "text/plain",
           "application/json",

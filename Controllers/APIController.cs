@@ -1,11 +1,12 @@
-﻿using BankingTransactionApi.Models;
-using System.Net;
-using Microsoft.Extensions.Logging;
-using BankingTransactionApi.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using BankingTransactionApi.Data;
+using BankingTransactionApi.Models;
+using BankingTransactionApi.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace BankingTransactionApi.Controllers
 {
@@ -17,11 +18,13 @@ namespace BankingTransactionApi.Controllers
     {
         private readonly BankingContext _context;
         private readonly ILogger<TransactionsController> _logger;
+        private readonly AMLService _amlService;
 
-        public TransactionsController(BankingContext context, ILogger<TransactionsController> logger)
+        public TransactionsController(BankingContext context, ILogger<TransactionsController> logger, AMLService amlService)
         {
             _context = context;
             _logger = logger;
+            _amlService = amlService;
         }
 
         // Original simple transfer (keep for reference)
@@ -59,7 +62,7 @@ namespace BankingTransactionApi.Controllers
         [HttpPost("create-account")]
         public async Task<ActionResult<Account>> CreateAccount([FromBody] Account account)
         {
-            var username = User.Identity.Name;
+            var username = User.Identity?.Name;
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
@@ -101,7 +104,7 @@ namespace BankingTransactionApi.Controllers
 
         // Database-powered money transfer
         [HttpPost("transfer")]
-        public async Task<ActionResult<string>> Transfer([FromBody] TransferRequest request)
+        public async Task<ActionResult<TransferResponse>> Transfer([FromBody] TransferRequest request)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -112,32 +115,46 @@ namespace BankingTransactionApi.Controllers
                     .Include(u => u.Accounts)
                     .FirstOrDefaultAsync(u => u.Username == username);
 
-                if (user == null)
-                    return Unauthorized("User not found");
+                if (user == null) return Unauthorized("User not found");
 
-                // Find accounts - ensure user owns the fromAccount
+                // Find accounts
                 var fromAccount = user.Accounts.FirstOrDefault(a => a.AccountNumber == request.FromAccount);
                 var toAccount = await _context.Accounts
                     .FirstOrDefaultAsync(a => a.AccountNumber == request.ToAccount);
 
-                if (fromAccount == null)
-                    return BadRequest("Source account not found or you don't own it");
-                if (toAccount == null)
-                    return BadRequest("Destination account not found");
+                if (fromAccount == null) return BadRequest("Source account not found");
+                if (toAccount == null) return BadRequest("Destination account not found");
 
                 // Business logic validation
-                if (fromAccount.Balance < request.Amount)
-                    return BadRequest("Insufficient funds");
-                if (request.Amount <= 0)
-                    return BadRequest("Amount must be positive");
-                if (fromAccount.DailyTransferLimit < request.Amount)
-                    return BadRequest("Transfer amount exceeds daily limit");
+                if (fromAccount.Balance < request.Amount) return BadRequest("Insufficient funds");
+                if (request.Amount <= 0) return BadRequest("Amount must be positive");
 
-                // Perform transfer
+                // 🚨 AML COMPLIANCE CHECK
+                var amlResult = _amlService.ScreenTransaction(
+                    new Transaction
+                    {
+                        Amount = request.Amount,
+                        FromAccountId = fromAccount.Id,
+                        ToAccountId = toAccount.Id
+                    },
+                    fromAccount,
+                    toAccount
+                );
+
+                if (amlResult.IsSuspicious)
+                {
+                    _logger.LogWarning($"AML Alert: Suspicious transaction blocked. Risk: {amlResult.RiskLevel}");
+                    return BadRequest(new
+                    {
+                        Message = "Transaction flagged for compliance review",
+                        AMLResult = amlResult
+                    });
+                }
+
+                // Perform transfer (existing code)
                 fromAccount.Balance -= request.Amount;
                 toAccount.Balance += request.Amount;
 
-                // Record transaction
                 var transactionRecord = new Transaction
                 {
                     FromAccountId = fromAccount.Id,
@@ -151,22 +168,30 @@ namespace BankingTransactionApi.Controllers
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                // Audit log
-                await LogAction("MoneyTransfer",
-                    $"Transferred {request.Amount} from {request.FromAccount} to {request.ToAccount}");
+                // Log AML result even for clean transactions
+                _logger.LogInformation($"Transfer completed. AML Risk: {amlResult.RiskLevel}");
 
-                _logger.LogInformation("Transfer completed: {From} -> {To} : {Amount}",
-                    request.FromAccount, request.ToAccount, request.Amount);
-
-                return Ok($"Transferred {request.Amount} from {request.FromAccount} to {request.ToAccount}");
+                return Ok(new TransferResponse
+                {
+                    Message = $"Transferred {request.Amount} from {request.FromAccount} to {request.ToAccount}",
+                    TransactionId = transactionRecord.TransactionId,
+                    AMLResult = amlResult
+                });
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, "Transfer failed: {From} -> {To} : {Amount}",
-                    request.FromAccount, request.ToAccount, request.Amount);
+                _logger.LogError(ex, "Transfer failed");
                 throw;
             }
+        }
+
+        // Add this new response model
+        public class TransferResponse
+        {
+            public string Message { get; set; } = string.Empty;
+            public string TransactionId { get; set; } = string.Empty;
+            public AMLResult? AMLResult { get; set; }
         }
 
         // User transaction history
